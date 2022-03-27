@@ -10,7 +10,7 @@ parser.add_argument('-p', '--password', dest='password', type=str, required=True
 args = parser.parse_args()
 
 def onlogin_callback(api):
-    with open(Path(__file__).resolve().parent.joinpath('../app/config/instaAPI.txt'), 'w') as outfile:
+    with open(Path(__file__).resolve().parent.joinpath('config/instaAPI.txt'), 'w') as outfile:
         outfile.write(codecs.encode(api.settings['cookie'], 'base64').decode())
         print('INSTAGRAM HAS CONNECTED!')
 
