@@ -13,6 +13,6 @@ redirect_url = auth.get_authorization_url()
 print(redirect_url)
 print('Access Token:')
 auth.get_access_token(input())
-with open(Path(__file__).resolve().parent.joinpath('config/twitterAPI.txt'), 'w') as outfile:
+with open(Path(__file__).resolve().parent.joinpath('../app/config/twitterAPI.txt'), 'w') as outfile:
     outfile.write('\n'.join([args.consumer_key,args.consumer_secret,auth.access_token,auth.access_token_secret]))
 print('TWITTER HAS CONNECTED')
