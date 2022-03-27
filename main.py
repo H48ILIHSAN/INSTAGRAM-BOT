@@ -1,5 +1,7 @@
 import codecs
 import os
+from pprint import pprint
+import subprocess
 import urllib.request
 import tweepy
 import time
@@ -43,17 +45,24 @@ def parseStory(userInfo):
             mediaURL.append(Data('picture', takenTS, media['image_versions2']['candidates'][-1]['url'], None))
     return mediaURL
 
-def getStory(story):
-    _, storyExt = os.path.splitext(urlparse(story.media_url).path)
-    storyName = absPath('assets/story' + storyExt)
-    urllib.request.urlretrieve(story.media_url, storyName)
-    if story.audio_url is not None:
-        _, audioExt = os.path.splitext(urlparse(story.audio_url).path)
-        audioName = absPath('assets/audio' + audioExt)
-        urllib.request.urlretrieve(story.audio_url, audioName)
-    else:
-        audioName = storyName
-    
+def getStory(storyGET):
+    with open(absPath('config/instaAPI.txt')) as instaData:
+        kuki = codecs.decode(instaData.read().encode(), 'base64')
+    storyGET = Client(INSTA_USERNAME,'', cookie=kuki)
+    storyData = storyGET.user_reel_media(INSTA_ID)
+    counter = 0
+    if storyData['items'] is not None:
+        counter = storyData['media_count']
+        for i in storyData['items']:
+            if i["media_type"] == 1:
+                url = i['image_versions2']['candidates'][0]['url']
+                end = absPath('assets/story.mp4')
+                urllib.request.urlretrieve(url, end)
+            elif i["media_type"] == 2:
+                url = i['video_versions'][0]['url']
+                end = absPath('assets/story.mp4')
+                urllib.request.urlretrieve(url, end)
+
 def getTwitAPI():
     with open(absPath('config/twitterAPI.txt')) as twitData:
         ckey, csecret, tkey, tsecret = twitData.read().split('\n')
@@ -62,32 +71,26 @@ def getTwitAPI():
     return tweepy.API(twitAuth)
 
 def twitMedia(filePath):
-    _, Ext = os.path.splitext(urlparse(story.media_url).path)
-    filePath = absPath('assets/story' + Ext)
+    filePath = absPath('assets/story.mp4')
     TwitAPI = getTwitAPI()
     print('UPLOADING {}...'.format(filePath))
     try:
-        Twit = TwitAPI.update_status_with_media(filename=filePath, status='ayang jkt48.zee habis bikin story')
+        Twit = TwitAPI.update_status_with_media(filename=filePath, status='test bot')
         if hasattr(Twit, 'processing_info') and Twit.processing_info['state'] == 'pending':
             print('Pending...')
             time.sleep(15)
         print('TWEETING!')
     except tweepy.TwitterServerError as err:
-        print('ERROR:', err)
-    print('SUCCESS!')
+            print('ERROR:', err)
+            print('SUCCESS!')
 
 def ReadLastTweet():
     if not os.path.exists(absPath('temp.txt')):
         return 0
     with open(absPath('temp.txt')) as file:
         read = file.read()
-        timestamp = int()
+        timestamp = int(read)
     return timestamp
-
-def SaveLastTweet(story):
-    with open('temp.txt','w') as file:
-        write = str(story.taken_at)
-        file.write(write)
 
 def deleteTweet():
     print('CHECKING OLD TWEETS...')
@@ -99,18 +102,24 @@ def deleteTweet():
             TwitApi.destroy_status(tweet.id_str)
     return
 
+def SaveLastTweet(story):
+    with open('temp.txt','w') as file:
+        write = str(story.taken_at)
+        file.write(write)
+
 while True:
     if __name__ == '__main__':
         userInfo = fetchStory()
         stories  = parseStory(userInfo)
-        print('{:d} STORIES FOUND!'.format(len(stories)))
         lastStory = ReadLastTweet()
         for story in stories:
             if lastStory >= story.taken_at:
+                print()
                 print('TWEET FOR STORY {} ALREADY SENT'.format(story.taken_at))
+                time.sleep(60)
                 continue
-            fileName = getStory(story)
+            fileName = parseStory(story)
             twitMedia(fileName)
             SaveLastTweet(story)
             break
-    time.sleep(6000)
+                
