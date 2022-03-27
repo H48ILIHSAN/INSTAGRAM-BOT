@@ -1,5 +1,4 @@
 import codecs
-from operator import truediv
 import os
 import urllib.request
 import tweepy
@@ -10,7 +9,6 @@ from instagram_private_api import Client
 from collections import namedtuple
 from xml.dom.minidom import parseString
 from urllib.parse import urlparse
-from pprint import pprint
 
 INSTA_USERNAME = 'jkt48.zee'
 INSTA_ID       = '9144760144'

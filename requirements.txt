@@ -1,0 +1,2 @@
+tweepy==4.8.0
+instagram-private-api==1.6.0.0
