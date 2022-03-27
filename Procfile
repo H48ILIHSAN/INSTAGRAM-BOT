@@ -1,1 +1,1 @@
-worker: run python.py
+worker: sh setup.sh && streamlit run main.py
