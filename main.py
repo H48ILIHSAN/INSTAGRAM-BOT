@@ -17,7 +17,7 @@ def absPath(path):
     return str(Path(__file__).resolve().parent.joinpath(path))
 
 def fetchStory():
-    with open(absPath('config/instaAPI.txt')) as instaData:
+    with open(absPath('../app/config/instaAPI.txt')) as instaData:
         kuki = codecs.decode(instaData.read().encode(), 'base64')
     instaAPI = Client(INSTA_USERNAME,'', cookie=kuki)
     return instaAPI.user_story_feed(INSTA_ID)
@@ -45,17 +45,17 @@ def parseStory(userInfo):
 
 def getStory(story):
     _, storyExt = os.path.splitext(urlparse(story.media_url).path)
-    storyName = absPath('assets/story' + storyExt)
+    storyName = absPath('../app/assets/story' + storyExt)
     urllib.request.urlretrieve(story.media_url, storyName)
     if story.audio_url is not None:
         _, audioExt = os.path.splitext(urlparse(story.audio_url).path)
-        audioName = absPath('assets/audio' + audioExt)
+        audioName = absPath('../app/assets/audio' + audioExt)
         urllib.request.urlretrieve(story.audio_url, audioName)
     else:
         audioName = storyName
     
 def getTwitAPI():
-    with open(absPath('config/twitterAPI.txt')) as twitData:
+    with open(absPath('../app/config/twitterAPI.txt')) as twitData:
         ckey, csecret, tkey, tsecret = twitData.read().split('\n')
     twitAuth = tweepy.OAuthHandler(ckey, csecret)
     twitAuth.set_access_token(tkey, tsecret)
@@ -63,7 +63,7 @@ def getTwitAPI():
 
 def twitMedia(filePath):
     _, Ext = os.path.splitext(urlparse(story.media_url).path)
-    filePath = absPath('assets/story' + Ext)
+    filePath = absPath('../app/assets/story' + Ext)
     TwitAPI = getTwitAPI()
     print('UPLOADING {}...'.format(filePath))
     try:
@@ -77,15 +77,15 @@ def twitMedia(filePath):
     print('SUCCESS!')
 
 def ReadLastTweet():
-    if not os.path.exists(absPath('temp.txt')):
+    if not os.path.exists(absPath('../app/temp.txt')):
         return 0
-    with open(absPath('temp.txt')) as file:
+    with open(absPath('../app/temp.txt')) as file:
         read = file.read()
         timestamp = int()
     return timestamp
 
 def SaveLastTweet(story):
-    with open('temp.txt','w') as file:
+    with open('../app/temp.txt','w') as file:
         write = str(story.taken_at)
         file.write(write)
 
