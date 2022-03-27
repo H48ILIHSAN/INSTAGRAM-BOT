@@ -75,7 +75,7 @@ def twitMedia(filePath):
     TwitAPI = getTwitAPI()
     print('UPLOADING {}...'.format(filePath))
     try:
-        Twit = TwitAPI.update_status_with_media(filename=filePath, status='test bot')
+        Twit = TwitAPI.update_status_with_media(filename=filePath, status='story baru dari ayang @A_ZeeJKT48\n' + 'ID:' + story.taken_at )
         if hasattr(Twit, 'processing_info') and Twit.processing_info['state'] == 'pending':
             print('Pending...')
             time.sleep(15)
