@@ -75,7 +75,7 @@ def twitMedia(filePath):
     TwitAPI = getTwitAPI()
     print('UPLOADING {}...'.format(filePath))
     try:
-        Twit = TwitAPI.update_status_with_media(filename=filePath, status='story baru dari ayang @A_ZeeJKT48\n' + 'ID:' + story.taken_at )
+        Twit = TwitAPI.update_status_with_media(filename=filePath, status='story baru dari ayang @A_ZeeJKT48\nID:' + str(story.taken_at))
         if hasattr(Twit, 'processing_info') and Twit.processing_info['state'] == 'pending':
             print('Pending...')
             time.sleep(15)
@@ -116,9 +116,9 @@ while True:
             if lastStory >= story.taken_at:
                 print()
                 print('TWEET FOR STORY {} ALREADY SENT'.format(story.taken_at))
-                time.sleep(60)
+                time.sleep(300)
                 continue
-            fileName = parseStory(story)
+            fileName = getStory(story)
             twitMedia(fileName)
             SaveLastTweet(story)
             break
