@@ -3,6 +3,7 @@ import os
 import urllib.request
 import tweepy
 import time
+import logging
 
 from pathlib import Path
 from instagram_private_api import Client
@@ -23,10 +24,11 @@ def fetchStory():
 
 def parseStory(userInfo):
     if userInfo['reel'] is None: return[0]
-    Data = namedtuple('Story', ['type','taken_at','media_url','audio_url'])
+    Data = namedtuple('Story', ['id','type','taken_at','media_url','audio_url'])
     mediaURL = []
     for media in userInfo['reel']['items']:
         takenTS = int(media.get('taken_at'))
+        id = int(media.get('id'))
         if 'video_version' in media:
             videoManifest = parseString(media['video_dash_manifest'])
             videoPeriod   = videoManifest.documentElement.getElementsByTagName('Period')
@@ -39,7 +41,7 @@ def parseStory(userInfo):
             else:
                 mediaURL.append(Data('video', takenTS, videoURL, None))
         else:
-            mediaURL.append(Data('picture', takenTS, media['image_versions2']['candidates'][-1]['url'], None))
+            mediaURL.append(Data('picture', takenTS, media['image_versions2']['candidates'][-1]['url'], id, None))
     return mediaURL
 
 def getStory(storyGET):
@@ -70,11 +72,7 @@ def twitMedia(filePath):
     TwitAPI = getTwitAPI()
     print('UPLOADING {}...'.format(filePath))
     try:
-        Twit = TwitAPI.media_upload(filePath)
-        TwitAPI.update_status(status='story baru dari ayang @A_ZeeJKT48 😘', media_ids=[Twit.media_id_string])
-        if hasattr(Twit, 'processing_info') and Twit.processing_info['state'] == 'pending':
-            print('Pending...')
-            time.sleep(15)
+        print('INI CERITANYA UDAH KE TWEET!')
         print('TWEETING!')
     except tweepy.TwitterServerError as err:
             print('ERROR:', err)
@@ -100,8 +98,13 @@ def deleteTweet():
 
 def SaveLastTweet(story):
     with open('temp.txt','w') as file:
-        write = str(story.taken_at)
+        write = str(story.id)
         file.write(write)
+
+def Log():
+    with open('log.txt','w') as file:
+        log = logging.info('This is an info message')
+        file.write(log)
 
 while True:
     if __name__ == '__main__':
@@ -109,11 +112,13 @@ while True:
         stories  = parseStory(userInfo)
         lastStory = ReadLastTweet()
         for story in stories:
-            if lastStory >= story.taken_at:
-                print('TWEET FOR STORY {} ALREADY SENT'.format(story.taken_at))
+            id = int(story.id)
+            if lastStory >= id:
+                print('TWEET FOR STORY {} ALREADY SENT'.format(id))
                 continue
             fileName = getStory(story)
             twitMedia(fileName)
             SaveLastTweet(story)
+            Log()
             break
     time.sleep(60)
