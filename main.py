@@ -1,7 +1,5 @@
 import codecs
 import os
-from pprint import pprint
-import subprocess
 import urllib.request
 import tweepy
 import time
@@ -10,7 +8,6 @@ from pathlib import Path
 from instagram_private_api import Client
 from collections import namedtuple
 from xml.dom.minidom import parseString
-from urllib.parse import urlparse
 
 INSTA_USERNAME = 'jkt48.zee'
 INSTA_ID       = '9144760144'
@@ -50,9 +47,7 @@ def getStory(storyGET):
         kuki = codecs.decode(instaData.read().encode(), 'base64')
     storyGET = Client(INSTA_USERNAME,'', cookie=kuki)
     storyData = storyGET.user_reel_media(INSTA_ID)
-    counter = 0
     if storyData['items'] is not None:
-        counter = storyData['media_count']
         for i in storyData['items']:
             if i["media_type"] == 1:
                 url = i['image_versions2']['candidates'][0]['url']
@@ -75,14 +70,15 @@ def twitMedia(filePath):
     TwitAPI = getTwitAPI()
     print('UPLOADING {}...'.format(filePath))
     try:
-        Twit = TwitAPI.update_status_with_media(filename=filePath, status='story baru dari ayang @A_ZeeJKT48\nID:' + str(story.taken_at))
+        Twit = TwitAPI.media_upload(filePath)
+        TwitAPI.update_status(status='story baru dari ayang @A_ZeeJKT48 😘', media_ids=[Twit.media_id_string])
         if hasattr(Twit, 'processing_info') and Twit.processing_info['state'] == 'pending':
             print('Pending...')
             time.sleep(15)
         print('TWEETING!')
     except tweepy.TwitterServerError as err:
             print('ERROR:', err)
-            print('SUCCESS!')
+    print('SUCCESS!')
 
 def ReadLastTweet():
     if not os.path.exists(absPath('temp.txt')):
@@ -114,12 +110,10 @@ while True:
         lastStory = ReadLastTweet()
         for story in stories:
             if lastStory >= story.taken_at:
-                print()
                 print('TWEET FOR STORY {} ALREADY SENT'.format(story.taken_at))
-                time.sleep(300)
                 continue
             fileName = getStory(story)
             twitMedia(fileName)
             SaveLastTweet(story)
             break
-                
+    time.sleep(60)
